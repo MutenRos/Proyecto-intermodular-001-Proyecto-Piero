@@ -9,7 +9,10 @@ import random
 # ----------------------------
 # CONFIG
 # ----------------------------
-SEARCH_QUERY = input("Introduce el termino que quieres buscar: ")  # Your search term
+SEARCH_QUERY = input("Introduce el termino que quieres buscar: ").strip()
+if not SEARCH_QUERY:
+    print("Error: debes introducir un término de búsqueda.")
+    exit(1)
 OUTPUT_DIR = "google_images"
 RESULTS_PER_PAGE = 20
 

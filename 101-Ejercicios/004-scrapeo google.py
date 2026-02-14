@@ -7,8 +7,13 @@ from urllib.parse import urljoin, urlparse
 # ----------------------------
 # CONFIG
 # ----------------------------
-URL = "https://www.google.com/search?client=ubuntu-chr&hs=zc5&sca_esv=6405bf69fd380f07&sxsrf=AE3TifNt_yEjQ4Met0O46fu4_IZCFjp1ow:1763391692306&udm=2&fbs=AIIjpHx4nJjfGojPVHhEACUHPiMQht6_BFq6vBIoFFRK7qchKEWEvuc0Hbw31oEI7c8o3y4MyqtV5m4rLCGDMco7dQbsn3LCPjOfwb34Pr7sZ7pnaif_wxkbmQ1RDXUJKmgZFKA0yxjAW_dJQshoFr_Eza33GZmyYOVuvA5oknEnCdniqMIxxsRvdOoVFuW0LrZXtURuPEoR&q=ardilla&sa=X&ved=2ahUKEwiFwa37ufmQAxXlhf0HHdPdAIQQtKgLegQIERAB&biw=1920&bih=884&dpr=1"
-OUTPUT_DIR = "imagenes"
+SEARCH_QUERY = "ardilla"
+URL = f"https://www.google.com/search?q={SEARCH_QUERY}&tbm=isch&hl=es"
+OUTPUT_DIR = "google_images"
+TIMEOUT = 15
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+}
 
 # Crear carpeta si no existe
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -16,8 +21,14 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 # ----------------------------
 # Descargar HTML
 # ----------------------------
-print(f"Descargando HTML desde {URL}...")
-response = requests.get(URL)
+print(f"Buscando imágenes de '{SEARCH_QUERY}' en Google...")
+try:
+    response = requests.get(URL, headers=HEADERS, timeout=TIMEOUT)
+    response.raise_for_status()
+except requests.exceptions.RequestException as e:
+    print(f"Error al conectar con Google: {e}")
+    exit(1)
+
 html = response.text
 
 soup = BeautifulSoup(html, "html.parser")
@@ -63,7 +74,7 @@ for img_url in image_urls:
 
         filepath = os.path.join(OUTPUT_DIR, filename)
 
-        img_data = requests.get(img_url).content
+        img_data = requests.get(img_url, headers=HEADERS, timeout=TIMEOUT).content
 
         with open(filepath, "wb") as f:
             f.write(img_data)

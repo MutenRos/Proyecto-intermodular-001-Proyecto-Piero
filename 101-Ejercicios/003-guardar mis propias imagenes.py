@@ -9,6 +9,10 @@ from urllib.parse import urljoin, urlparse
 # ----------------------------
 URL = "https://jocarsa.com"
 OUTPUT_DIR = "imagenes"
+TIMEOUT = 10
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+}
 
 # Crear carpeta si no existe
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -17,7 +21,13 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 # Descargar HTML
 # ----------------------------
 print(f"Descargando HTML desde {URL}...")
-response = requests.get(URL)
+try:
+    response = requests.get(URL, headers=HEADERS, timeout=TIMEOUT)
+    response.raise_for_status()
+except requests.exceptions.RequestException as e:
+    print(f"Error al descargar la página: {e}")
+    exit(1)
+
 html = response.text
 
 soup = BeautifulSoup(html, "html.parser")
@@ -63,7 +73,7 @@ for img_url in image_urls:
 
         filepath = os.path.join(OUTPUT_DIR, filename)
 
-        img_data = requests.get(img_url).content
+        img_data = requests.get(img_url, headers=HEADERS, timeout=TIMEOUT).content
 
         with open(filepath, "wb") as f:
             f.write(img_data)
